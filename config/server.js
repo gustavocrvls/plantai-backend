@@ -13,6 +13,8 @@ module.exports = function () {
     app.use(cors());
     app.set('port', API_PORT)
     dotenv.config();
+
+    console.log(`Your port is ${process.env.PORT}`);
     
     app.use(morgan('dev'));
     app.use(bodyParser.urlencoded({ extended: false }));
