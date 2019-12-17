@@ -5,8 +5,8 @@ const logger = require('morgan')
 const passport = require('passport')
 const morgan = require('morgan')
 const dotenv = require('dotenv');
-// const API_PORT = process.env.PORT || 3001;
-const API_PORT = 3001
+const API_PORT = process.env.PORT || 3001;
+// const API_PORT = 3001
 
 module.exports = function () {
     const app = express();
