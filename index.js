@@ -1,4 +1,4 @@
-var app = require('./config/server')()
+var app = require('./config/server')
 
 require('./config/database')('mongodb+srv://carvalho:YdPA3ccZoEdyA2yG@sirius-bsehu.gcp.mongodb.net/test?retryWrites=true&w=majority');
 

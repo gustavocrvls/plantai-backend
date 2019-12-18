@@ -10,48 +10,41 @@ const multer = require('multer')
 const API_PORT = process.env.PORT || 3001;
 // const API_PORT = 3001
 
-module.exports = function () {
-    const app = express();
-    app.use(cors());
-    app.set('port', API_PORT)
-    dotenv.config();
+dotenv.config();
 
-    console.log(`Your port is ${process.env.PORT}`);
+var app = express();
+app.set('port', API_PORT)
 
-    app.use(morgan('dev'));
-    app.use(bodyParser.urlencoded({ extended: false }));
-    app.use(bodyParser.json());
-    app.use(logger('dev'));
+app.use(cors());
+app.use(morgan('dev'));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(logger('dev'));
+app.use(require('method-override')());
+app.use(express.static(__dirname + '/public'));
+app.use(multer({
+    dest: './uploads/',
+    rename: function (fieldname, filename) {
+        return filename;
+    },
+}).any());
+app.use(
+    session({
+        secret: 'secret',
+        saveUninitialized: true,
+        resave: true,
+        // using store session on MongoDB using express-session + connect
+        // store: new MongoStore({
+        //     url: config.urlMongo,
+        //     collection: 'sessions'
+        // })
+    })
+)
 
-    app.use(require('method-override')());
-    app.use(express.static(__dirname + '/public'));
+require('../models/Usuario');
+require('../config/passport');
+app.use(require('../routes/'));
+app.use(passport.initialize());
+app.use(passport.session());
 
-    app.use(multer({ dest: './uploads/',
-        rename: function (fieldname, filename) {
-          return filename;
-        },
-    }).any());
-
-    app.use(
-        session({
-            secret: 'secret',
-            saveUninitialized: true,
-            resave: true,
-            // using store session on MongoDB using express-session + connect
-            // store: new MongoStore({
-            //     url: config.urlMongo,
-            //     collection: 'sessions'
-            // })
-        })
-    )
-
-    require('../models/Usuario');
-    require('../config/passport');
-    app.use(require('../routes/'));
-
-    app.use(passport.initialize());
-    app.use(passport.session());
-
-
-    return app;
-}
+module.exports = app;
