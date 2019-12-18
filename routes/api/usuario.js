@@ -52,22 +52,18 @@ router.post('/putUsuario', (req, res) => {
  * @since 13/12/2019
  */
 router.post('/login', function (req, res, next) {
-  // user = {}
-  // if(!req.body.login){
-  //   return res.status(422).json({errors: {login: "não pode ser vazio"}});
-  // } else {
-  //   user.login = req.body.login
-  // }
+  if(!req.body.user.login){
+    return res.status(422).json({errors: {login: "não pode ser vazio"}});
+  }
 
-  // if(!req.body.senha){
-  //   return res.status(422).json({errors: {senha: "não pode ser vazio"}});
-  // }
-  // console.log(user);
-
+  if(!req.body.senha){
+    return res.status(422).json({errors: {senha: "não pode ser vazio"}});
+  }
+  
   passport.authenticate('local', { session: false }, function (err, user, info) {
     if (err) { return next(err); }
-
-    console.log(req);
+    
+    console.log(req.body['user']);
 
     if (user) {
       user.token = user.generateJWT();
