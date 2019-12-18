@@ -1,11 +1,17 @@
 var router = require('express').Router();
 const fs = require('fs')
+const Image = require('../../models/Image')
 
-router.post('/photo',function(req,res){
-    var newItem = new Item();
-    newItem.img.data = fs.readFileSync(req.files.userPhoto.path)
+router.post('/save',function(req,res){
+    // console.log(req.body.file);
+    
+    var newItem = new Image();
+    newItem.img.data = fs.readFileSync(req.files[0].path)
     newItem.img.contentType = 'image/png'
-    newItem.save();
+    newItem.save((err) => {
+        if (err) return res.json({ success: false, error: err });
+        return res.json({ success: true });
+    });
    })
 
 module.exports = router
