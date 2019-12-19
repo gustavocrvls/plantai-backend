@@ -44,7 +44,7 @@ router.post('/putUsuario', (req, res) => {
   usuario.login = req.body.login
   usuario.setPassword(req.body.senha)
   usuario.nome = req.body.nome
-  usuario.acesso = 1
+  usuario.acesso = 2 //usuario normal
 
   console.log(usuario);
 
