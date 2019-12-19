@@ -86,8 +86,6 @@ router.post('/login', function (req, res, next) {
  * @method DELETE
  */
 router.get('/deleteUsuario/:id', auth.required, function (req, res, next) {
-  console.log(req.params);
-  
   UsuarioModel.deleteOne({ _id: req.params.id }, (err) => {
     if (err) return res.send(err);
     return res.json({ success: true });

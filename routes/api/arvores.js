@@ -8,6 +8,12 @@ router.get('/findAllArvore', auth.optional, (req, res) => {
     });
 });
 
+router.get('/findArvore/:id', auth.optional, (req, res) => {
+    ArvoreModel.find({ _id: req.params.id }, (err, data) => {
+        return res.json(data)
+    });
+});
+
 router.get('/countArvores', auth.optional, (req, res) => {
     ArvoreModel.countDocuments({}, (err, c) => {
         return res.json({count: c})
