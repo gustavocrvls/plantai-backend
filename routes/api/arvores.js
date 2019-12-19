@@ -1,6 +1,7 @@
 const ArvoreModel = require('../../models/Arvore').ArvoreModel;
 const auth = require("../../middleware/auth");
 const router = require('express').Router();
+const fs = require('fs');
 
 router.get('/findAllArvore', auth.optional, (req, res) => {
     ArvoreModel.find((err, data) => {
@@ -21,17 +22,32 @@ router.get('/countArvores', auth.optional, (req, res) => {
 });
 
 router.post('/updateArvore', auth.required, (req, res) => {
-    const { id, update } = req.body;
-    if (!update.nome || !update.descricao || !update.link_img) {
+    if (!req.body.id || !req.body.nome || !req.body.descricao || !req.files[0].path) {
         return res.json({
             success: false,
             error: 'INVALID INPUTS',
         });
     }
-    ArvoreModel.update({ _id: id }, update, (err) => {
+
+    let update = {
+        img: {
+            data: null,
+            contentType: null
+        }
+    }
+    update.nome = req.body.nome;
+    update.descricao = req.body.descricao;
+    update.img.data = fs.readFileSync(req.files[0].path);
+    update.img.contentType = 'image/png';
+
+    console.log(update, req.body.id)
+
+    ArvoreModel.updateOne({ _id: req.body.id }, update, (err) => {
         if (err) return res.json({ success: false, error: err });
         return res.json({ success: true });
     });
+
+    fs.unlinkSync(req.files[0].path);
 });
 
 router.delete('/deleteArvore', auth.required, (req, res) => {
@@ -45,15 +61,15 @@ router.delete('/deleteArvore', auth.required, (req, res) => {
 router.post('/putArvore', auth.required, (req, res) => {
     let arvore = new ArvoreModel();
 
-    if (!nome || !descricao || !req.files[0].path) {
+    if (!req.body.nome || !req.body.descricao || !req.files[0].path) {
         return res.json({
             success: false,
             error: 'INVALID INPUTS',
         });
     }
 
-    arvore.nome = nome;
-    arvore.descricao = descricao;
+    arvore.nome = req.body.nome;
+    arvore.descricao = req.body.descricao;
     arvore.img.data = fs.readFileSync(req.files[0].path);
     arvore.img.contentType = 'image/png';
 
