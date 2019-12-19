@@ -1,7 +1,7 @@
-var app = require('./config/server')
+const app = require('./config/server');
 
-require('./config/database')('mongodb+srv://carvalho:YdPA3ccZoEdyA2yG@sirius-bsehu.gcp.mongodb.net/test?retryWrites=true&w=majority');
+require('./config/database')(process.env.DB_URI);
 
 app.listen(app.get('port'), function () {
-    console.log(`Server on port ${app.get('port')}`)
-})
+    console.log(`Express server started on port ${app.get('port')}`)
+});

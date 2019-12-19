@@ -1,21 +1,20 @@
-const Arvore = require('../../models/Arvore');
+const ArvoreModel = require('../../models/Arvore').ArvoreModel;
 const auth = require("../../middleware/auth");
-var router = require('express').Router();
+const router = require('express').Router();
 
-
-router.get('/findAllArvore', (req, res) => {
-    Arvore.find((err, data) => {
+router.get('/findAllArvore', auth.optional, (req, res) => {
+    ArvoreModel.find((err, data) => {
         return res.json({ success: true, data: data })
     });
 });
 
-router.get('/countArvores', (req, res) => {
-    Arvore.countDocuments({}, (err, c) => {
+router.get('/countArvores', auth.optional, (req, res) => {
+    ArvoreModel.countDocuments({}, (err, c) => {
         return res.json({count: c})
     })
 });
 
-router.post('/arvore/updateArvore', (req, res) => {
+router.post('/updateArvore', auth.required, (req, res) => {
     const { id, update } = req.body;
     if (!update.nome || !update.descricao || !update.link_img) {
         return res.json({
@@ -23,26 +22,24 @@ router.post('/arvore/updateArvore', (req, res) => {
             error: 'INVALID INPUTS',
         });
     }
-    Arvore.update({ _id: id }, update, (err) => {
+    ArvoreModel.update({ _id: id }, update, (err) => {
         if (err) return res.json({ success: false, error: err });
         return res.json({ success: true });
     });
 });
 
-router.delete('/arvore/deleteArvore', auth.required, (req, res) => {
+router.delete('/deleteArvore', auth.required, (req, res) => {
     const { id } = req.body;
-    Arvore.deleteOne({ _id: id }, (err) => {
+    ArvoreModel.deleteOne({ _id: id }, (err) => {
         if (err) return res.send(err);
         return res.json({ success: true });
     });
 });
 
-router.post('/arvore/putArvore', (req, res) => {
-    let arvore = new Arvore();
+router.post('/putArvore', auth.required, (req, res) => {
+    let arvore = new ArvoreModel();
 
-    const { nome, descricao, link_img } = req.body;
-
-    if (!nome || !descricao || !link_img) {
+    if (!nome || !descricao || !req.files[0].path) {
         return res.json({
             success: false,
             error: 'INVALID INPUTS',
@@ -50,13 +47,16 @@ router.post('/arvore/putArvore', (req, res) => {
     }
 
     arvore.nome = nome;
-    arvore.link_img = link_img;
     arvore.descricao = descricao;
+    arvore.img.data = fs.readFileSync(req.files[0].path);
+    arvore.img.contentType = 'image/png';
 
     arvore.save((err) => {
         if (err) return res.json({ success: false, error: err });
         return res.json({ success: true });
     });
+
+    fs.unlinkSync(req.files[0].path);
 });
 
-module.exports = router
+module.exports = router;

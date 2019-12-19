@@ -1,8 +1,11 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const fs = require('fs');
 
 const ImageSchema = new Schema(
     {
+        target_id: String,
+        type: String,
         img: 
         { 
             data: Buffer, 
@@ -12,4 +15,4 @@ const ImageSchema = new Schema(
     { timestamps: true }
 );
 
-module.exports = mongoose.model("Image", ImageSchema, 'image');
+module.exports.ImageModel = mongoose.model("Image", ImageSchema, 'image');

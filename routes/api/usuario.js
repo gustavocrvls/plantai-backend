@@ -1,30 +1,28 @@
-var passport = require('passport');
-var Usuario = require('../../models/Usuario')
-var auth = require('../../middleware/auth');
-var router = require('express').Router();
+const passport = require('passport');
+const UsuarioModel = require('../../models/Usuario').UsuarioModel;
+const auth = require('../../middleware/auth');
+const router = require('express').Router();
 
-// router.get('/findAllUsuario', auth.required, function (req, res, next) {
-//   Usuario.findById(req.payload.id).then(function (user) {
-//     if (!user) { return res.sendStatus(401); }
-
-//     return res.json({ usuario: user.toAuthJSON() });
-//   }).catch(next);
-// });
-
+/**
+ * @method READ
+ */
 router.get('/findAllUsuario', auth.required, function (req, res, next) {
-  Usuario.find((err, data) => {
+  UsuarioModel.find((err, data) => {
     return res.json({ success: true, data: data })
   })
 });
 
-router.post('/findUsuario', (req, res) => {
-  Usuario.findOne({ nome: req.body.nome, senha: req.body.senha }, (err, result) => {
+/**
+ * @method READ
+ */
+router.post('/findUsuario', auth.optional, (req, res) => {
+  UsuarioModel.findOne({ nome: req.body.nome, senha: req.body.senha }, (err, result) => {
     if (err) return res.json({ logged: false, error: err });
     if (!result) {
       return res.json({ logged: false });
     }
 
-    usuario = new Usuario()
+    usuario = new UsuarioModel()
     const token = usuario.generateAuthToken();
     res.header("x-auth-token", token).send({
       _id: usuario._id,
@@ -34,20 +32,20 @@ router.post('/findUsuario', (req, res) => {
   );
 });
 
-router.post('/putUsuario', (req, res) => {
-  var usuario = new Usuario();
+/**
+ * @method CREATE
+ */
+router.post('/putUsuario', auth.optional, (req, res) => {
+  var usuario = new UsuarioModel();
 
   if ((!req.body.login || !req.body.senha)) {
     return res.status(422).json({ errors: { login: "não pode ser vazio", senha: "não pode ser vazio" } })
   }
 
-  usuario.login = req.body.login
-  usuario.setPassword(req.body.senha)
-  usuario.nome = req.body.nome
-  usuario.acesso = 2 //usuario normal
-
-  console.log(usuario);
-
+  usuario.login = req.body.login;
+  usuario.setPassword(req.body.senha);
+  usuario.nome = req.body.nome;
+  usuario.acesso = 2; // 2 = normal user
 
   usuario.save((err) => {
     if (err) return res.json({ success: false, error: err });
@@ -59,8 +57,7 @@ router.post('/putUsuario', (req, res) => {
 });
 
 /**
- * @author Gustavo Carvalho
- * @since 13/12/2019
+ * @method LOGIN
  */
 router.post('/login', function (req, res, next) {
   if (!req.body.user.login) {
@@ -85,13 +82,34 @@ router.post('/login', function (req, res, next) {
   })(req, res, next);
 });
 
+/**
+ * @method DELETE
+ */
 router.get('/deleteUsuario/:id', auth.required, function (req, res, next) {
   console.log(req.params);
   
-  Usuario.deleteOne({ _id: req.params.id }, (err) => {
+  UsuarioModel.deleteOne({ _id: req.params.id }, (err) => {
     if (err) return res.send(err);
     return res.json({ success: true });
   });
 });
 
-module.exports = router
+/**
+ * @method UPDATE
+ */
+router.post('/updateUsuario', auth.required, (req, res) => {
+  const { id, update } = req.body;
+  if (!update.login || !update.senha || !update.nome) {
+    return res.json({
+      success: false,
+      error: 'INVALID INPUTS',
+    });
+  }
+  update.setPassword(update.senha);
+  UsuarioModel.update({ _id: id }, update, (err) => {
+    if (err) return res.json({ success: false, error: err });
+    return res.json({ success: true });
+  });
+});
+
+module.exports = router;

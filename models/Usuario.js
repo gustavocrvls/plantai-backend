@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const config = require("config");
 const jwt = require('jsonwebtoken');
 const secret = require('../config').secret;
-const crypto = require('crypto')
+const crypto = require('crypto');
 
 const Schema = mongoose.Schema;
 
@@ -12,7 +12,7 @@ const UsuarioSchema = new Schema(
     login: String,
     nome: String,
     acesso: Number,
-    score: 0,
+    score: Number,
     salt: String,
     hash: String
   },
@@ -21,9 +21,8 @@ const UsuarioSchema = new Schema(
 );
 
 UsuarioSchema.methods.validPassword = function(senha) {
-  var hash = crypto.pbkdf2Sync(senha, this.salt, 10000, 512, 'sha512').toString('hex');
+  let hash = crypto.pbkdf2Sync(senha, this.salt, 10000, 512, 'sha512').toString('hex');
   return this.hash === hash;
-  // TODO validação
 };
 
 UsuarioSchema.methods.setPassword = function(password){
@@ -32,14 +31,13 @@ UsuarioSchema.methods.setPassword = function(password){
 };
 
 //custom method to generate authToken 
-UsuarioSchema.methods.generateAuthToken = function() { 
-  const token = jwt.sign({ login: this.login}, config.get('myprivatekey')); //get the private key from the config file -> environment variable
-  return token;
-}
+UsuarioSchema.methods.generateAuthToken = function() {
+    return jwt.sign({login: this.login}, config.get('myprivatekey')); //get the private key from the config file -> environment variable
+};
 
 UsuarioSchema.methods.generateJWT = function() {
-  var today = new Date();
-  var exp = new Date(today);
+  let today = new Date();
+  let exp = new Date(today);
   exp.setDate(today.getDate() + 60);
 
   return jwt.sign({
@@ -57,4 +55,4 @@ UsuarioSchema.methods.toAuthJSON = function(){
   };
 };
 
-module.exports = mongoose.model("Usuario", UsuarioSchema, 'usuario');
+module.exports.UsuarioModel = mongoose.model("Usuario", UsuarioSchema, 'usuario');
