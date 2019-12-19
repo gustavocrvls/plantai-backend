@@ -3,12 +3,18 @@ var Usuario = require('../../models/Usuario')
 var auth = require('../../middleware/auth');
 var router = require('express').Router();
 
-router.get('/user', auth.required, function (req, res, next) {
-  Usuario.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
+// router.get('/findAllUsuario', auth.required, function (req, res, next) {
+//   Usuario.findById(req.payload.id).then(function (user) {
+//     if (!user) { return res.sendStatus(401); }
 
-    return res.json({ usuario: user.toAuthJSON() });
-  }).catch(next);
+//     return res.json({ usuario: user.toAuthJSON() });
+//   }).catch(next);
+// });
+
+router.get('/findAllUsuario', auth.required, function (req, res, next) {
+  Usuario.find((err, data) => {
+    return res.json({ success: true, data: data })
+  })
 });
 
 router.post('/findUsuario', (req, res) => {
@@ -29,20 +35,25 @@ router.post('/findUsuario', (req, res) => {
 });
 
 router.post('/putUsuario', (req, res) => {
-  let data = new Usuario();
+  var usuario = new Usuario();
 
-  const { login, senha } = req.body;
-
-  if ((!login || !senha)) {
-    return res.json({
-      success: false,
-      error: 'INVALID INPUTS',
-    });
+  if ((!req.body.login || !req.body.senha)) {
+    return res.status(422).json({ errors: { login: "não pode ser vazio", senha: "não pode ser vazio" } })
   }
-  data.login = login;
-  data.senha = senha;
-  data.save((err) => {
+
+  usuario.login = req.body.login
+  usuario.setPassword(req.body.senha)
+  usuario.nome = req.body.nome
+  usuario.acesso = 1
+
+  console.log(usuario);
+
+
+  usuario.save((err) => {
     if (err) return res.json({ success: false, error: err });
+
+    console.log('new user created!');
+
     return res.json({ success: true });
   });
 });
@@ -52,17 +63,17 @@ router.post('/putUsuario', (req, res) => {
  * @since 13/12/2019
  */
 router.post('/login', function (req, res, next) {
-  if(!req.body.user.login){
-    return res.status(422).json({errors: {login: "não pode ser vazio"}});
+  if (!req.body.user.login) {
+    return res.status(422).json({ errors: { login: "não pode ser vazio" } });
   }
 
-  if(!req.body.senha){
-    return res.status(422).json({errors: {senha: "não pode ser vazio"}});
+  if (!req.body.user.senha) {
+    return res.status(422).json({ errors: { senha: "não pode ser vazio" } });
   }
-  
+
   passport.authenticate('local', { session: false }, function (err, user, info) {
     if (err) { return next(err); }
-    
+
     console.log(req.body['user']);
 
     if (user) {
@@ -72,6 +83,15 @@ router.post('/login', function (req, res, next) {
       return res.status(422).json(info);
     }
   })(req, res, next);
+});
+
+router.get('/deleteUsuario/:id', auth.required, function (req, res, next) {
+  console.log(req.params);
+  
+  Usuario.deleteOne({ _id: req.params.id }, (err) => {
+    if (err) return res.send(err);
+    return res.json({ success: true });
+  });
 });
 
 module.exports = router

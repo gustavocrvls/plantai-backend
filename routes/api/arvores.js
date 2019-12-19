@@ -3,10 +3,16 @@ const auth = require("../../middleware/auth");
 var router = require('express').Router();
 
 
-router.get('/findAllArvore', auth.required, (req, res) => {
+router.get('/findAllArvore', (req, res) => {
     Arvore.find((err, data) => {
         return res.json({ success: true, data: data })
     });
+});
+
+router.get('/countArvores', (req, res) => {
+    Arvore.countDocuments({}, (err, c) => {
+        return res.json({count: c})
+    })
 });
 
 router.post('/arvore/updateArvore', (req, res) => {
@@ -23,7 +29,7 @@ router.post('/arvore/updateArvore', (req, res) => {
     });
 });
 
-router.delete('/arvore/deleteArvore', (req, res) => {
+router.delete('/arvore/deleteArvore', auth.required, (req, res) => {
     const { id } = req.body;
     Arvore.deleteOne({ _id: id }, (err) => {
         if (err) return res.send(err);

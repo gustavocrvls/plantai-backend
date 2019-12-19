@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const config = require("config");
 const jwt = require('jsonwebtoken');
 const secret = require('../config').secret;
+const crypto = require('crypto')
 
 const Schema = mongoose.Schema;
 
@@ -9,24 +10,20 @@ const UsuarioSchema = new Schema(
   {
     id: Number,
     login: String,
-    senha: String,
-    contato: {
-      nome: String,
-      email: String
-    },
-    acesso: {
-      nivel: Number
-    }
+    nome: String,
+    acesso: Number,
+    score: 0,
+    salt: String,
+    hash: String
   },
   { timestamps: true }
   
 );
 
 UsuarioSchema.methods.validPassword = function(senha) {
-  // var hash = crypto.pbkdf2Sync(senha, this.salt, 10000, 512, 'sha512').toString('hex');
-  // return this.hash === hash;
+  var hash = crypto.pbkdf2Sync(senha, this.salt, 10000, 512, 'sha512').toString('hex');
+  return this.hash === hash;
   // TODO validação
-  return senha == 'teste'
 };
 
 UsuarioSchema.methods.setPassword = function(password){
@@ -60,4 +57,4 @@ UsuarioSchema.methods.toAuthJSON = function(){
   };
 };
 
-mongoose.model("Usuario", UsuarioSchema, 'usuario');
+module.exports = mongoose.model("Usuario", UsuarioSchema, 'usuario');
