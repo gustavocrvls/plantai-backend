@@ -12,4 +12,4 @@ const MarcadorSchema = new Schema(
     {timestamps: true}
 );
 
-module.exports.MarcadorModel = mongoose.model("arvore", MarcadorSchema, 'arvore');
+module.exports.MarcadorModel = mongoose.model("Marcador", MarcadorSchema, 'marcador');

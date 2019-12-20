@@ -50,7 +50,7 @@ UsuarioSchema.methods.generateJWT = function() {
 UsuarioSchema.methods.toAuthJSON = function(){
   return {
     login: this.login,
-    contato: this.contato,
+    acesso: this.acesso,
     token: this.generateJWT()
   };
 };

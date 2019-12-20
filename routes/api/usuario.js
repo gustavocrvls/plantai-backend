@@ -38,6 +38,8 @@ router.post('/findUsuario', auth.optional, (req, res) => {
 router.post('/putUsuario', auth.optional, (req, res) => {
   var usuario = new UsuarioModel();
 
+  console.log(req.body)
+
   if ((!req.body.login || !req.body.senha)) {
     return res.status(422).json({ errors: { login: "não pode ser vazio", senha: "não pode ser vazio" } })
   }
@@ -45,14 +47,12 @@ router.post('/putUsuario', auth.optional, (req, res) => {
   usuario.login = req.body.login;
   usuario.setPassword(req.body.senha);
   usuario.nome = req.body.nome;
+  usuario.email = req.body.email;
   usuario.acesso = 2; // 2 = normal user
 
   usuario.save((err) => {
     if (err) return res.json({ success: false, error: err });
-
     console.log('new user created!');
-
-    return res.json({ success: true });
   });
 });
 
